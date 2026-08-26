@@ -35,6 +35,22 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             <NavLink href="/settings">Settings</NavLink>
           </nav>
           <div className="ml-auto flex items-center gap-3">
+            {dueToday > 0 && (
+              <span
+                className="hidden items-center gap-1 rounded-full bg-danger/10 px-2 py-0.5 text-xs font-medium text-danger md:inline-flex"
+                title={`You have ${dueToday} problem${dueToday === 1 ? "" : "s"} to revise (${queue.overdue.length} overdue, ${queue.due.length} due today)`}
+              >
+                🔔 {dueToday} to revise
+              </span>
+            )}
+            {dueToday === 0 && (
+              <span
+                className="hidden items-center gap-1 rounded-full bg-success/10 px-2 py-0.5 text-xs font-medium text-success md:inline-flex"
+                title="You have completed today's revisions."
+              >
+                ✓ All done for today
+              </span>
+            )}
             <span
               className="hidden items-center gap-1 text-sm font-medium sm:inline-flex"
               title={`${streak}-day revision streak`}

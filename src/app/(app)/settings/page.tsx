@@ -1,7 +1,12 @@
+import { headers } from "next/headers";
 import { requireSession } from "@/app/actions/auth";
+import { NotificationsSettings } from "@/components/settings/notifications-settings";
 import { RescheduleButton, SettingsForm } from "@/components/settings/settings-form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { isEmailConfigured } from "@/lib/email";
+import { isPushConfigured } from "@/lib/push";
 import { getUserPreferences } from "@/services/settings";
+import { prisma } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 
@@ -18,7 +23,18 @@ const COMMON_TIMEZONES = [
 
 export default async function SettingsPage() {
   const userId = (await requireSession()).user.id;
-  const preferences = await getUserPreferences(userId);
+  const [preferences, user] = await Promise.all([
+    getUserPreferences(userId),
+    prisma.user.findUniqueOrThrow({
+      where: { id: userId },
+      select: { feedToken: true, notifyEmail: true, notifyPush: true, reminderHour: true },
+    }),
+  ]);
+
+  const headersList = await headers();
+  const host = headersList.get("x-forwarded-host") ?? headersList.get("host") ?? "localhost:3000";
+  const proto = headersList.get("x-forwarded-proto") ?? (host.startsWith("localhost") ? "http" : "https");
+  const appUrl = `${proto}://${host}`;
 
   return (
     <div className="mx-auto flex max-w-xl flex-col gap-5">
@@ -49,6 +65,24 @@ export default async function SettingsPage() {
           <RescheduleButton />
         </CardContent>
       </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Notifications</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <NotificationsSettings
+            feedToken={user.feedToken}
+            appUrl={appUrl}
+            vapidPublicKey={process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ?? ""}
+            pushConfigured={isPushConfigured()}
+            emailConfigured={isEmailConfigured()}
+            notifyEmail={user.notifyEmail}
+            reminderHour={user.reminderHour}
+          />
+        </CardContent>
+      </Card>
     </div>
   );
 }
+
