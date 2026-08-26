@@ -3,7 +3,6 @@ import { DateTime } from "luxon";
 import { prisma as defaultDb } from "@/lib/db";
 import { isEmailConfigured, sendDigestEmail } from "@/lib/email";
 import { isPushConfigured, sendPush } from "@/lib/push";
-import { todayIsoDate } from "@/lib/scheduling";
 import { getRevisionQueue } from "@/services/revisions";
 
 type Db = PrismaClient;
@@ -79,7 +78,9 @@ export async function notifyUser(
   return { pushSent, emailSent };
 }
 
-/** Finds every user whose local clock matches their preferred reminder hour and notifies them. */
+/** Notifies every user with pending (or newly completed) revisions.
+ * On Vercel Hobby this runs once per day via cron; the per-user reminderHour
+ * becomes relevant when the schedule is upgraded to hourly. */
 export async function runNotificationSweep(
   appUrl: string,
   db: Db = defaultDb,
@@ -99,9 +100,6 @@ export async function runNotificationSweep(
   const details: { userId: string; pushSent: number; emailSent: boolean }[] = [];
 
   for (const user of users) {
-    const localHour = DateTime.now().setZone(user.timezone).hour;
-    if (localHour !== user.reminderHour) continue;
-
     const result = await notifyUser(user, appUrl, db);
     if (result.pushSent > 0 || result.emailSent) {
       details.push({ userId: user.id, ...result });
@@ -113,8 +111,4 @@ export async function runNotificationSweep(
 
 export async function shouldNotifyNow(timezone: string, reminderHour: number): Promise<boolean> {
   return DateTime.now().setZone(timezone).hour === reminderHour;
-}
-
-export function todayForUser(timezone: string): string {
-  return todayIsoDate(timezone);
 }
