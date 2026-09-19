@@ -72,8 +72,22 @@ model IntegrationToken {
   createdAt DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  pairing IntegrationPair?
 
   @@index([userId, revokedAt])
+}
+
+/// One-time browser-extension pairing codes. The extension holds the secret;
+/// this table only confirms that a user approved that pairing code.
+model IntegrationPair {
+  id                 String   @id @default(cuid())
+  codeHash           String   @unique
+  integrationTokenId String   @unique
+  expiresAt          DateTime
+  claimedAt          DateTime @default(now())
+
+  token IntegrationToken @relation(fields: [integrationTokenId], references: [id], onDelete: Cascade)
+  @@index([expiresAt])
 }
 
 model PushSubscription {

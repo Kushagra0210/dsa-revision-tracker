@@ -3,7 +3,7 @@
   "name": "DSA Revision Tracker — LeetCode Companion",
   "version": "0.1.0",
   "description": "Explicitly add the current LeetCode problem to your revision tracker.",
-  "permissions": ["storage", "activeTab"],
+  "permissions": ["storage", "activeTab", "tabs"],
   "host_permissions": ["https://leetcode.com/*"],
   "optional_host_permissions": ["https://*/*", "http://localhost/*"],
   "action": { "default_popup": "popup.html" },
