@@ -1,6 +1,7 @@
 import { headers } from "next/headers";
 import { requireSession } from "@/app/actions/auth";
 import { NotificationsSettings } from "@/components/settings/notifications-settings";
+import { LeetCodeCompanion } from "@/components/settings/leetcode-companion";
 import { RescheduleButton, SettingsForm } from "@/components/settings/settings-form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { isEmailConfigured } from "@/lib/email";
@@ -27,7 +28,7 @@ export default async function SettingsPage() {
     getUserPreferences(userId),
     prisma.user.findUniqueOrThrow({
       where: { id: userId },
-      select: { feedToken: true, notifyEmail: true, notifyPush: true, reminderHour: true },
+      select: { feedToken: true, notifyEmail: true, notifyPush: true, reminderHour: true, integrationTokens: { where: { revokedAt: null }, select: { id: true, label: true, createdAt: true, lastUsedAt: true } } },
     }),
   ]);
 
@@ -51,6 +52,11 @@ export default async function SettingsPage() {
             <p>{COMMON_TIMEZONES.join(" · ")}</p>
           </div>
         </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader><CardTitle>LeetCode companion</CardTitle></CardHeader>
+        <CardContent><LeetCodeCompanion appUrl={appUrl} tokens={user.integrationTokens} /></CardContent>
       </Card>
 
       <Card>
@@ -85,4 +91,3 @@ export default async function SettingsPage() {
     </div>
   );
 }
-

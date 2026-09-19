@@ -131,3 +131,10 @@ plus Auth.js tables (`Account`, `Session`, `VerificationToken`).
 The schema and service layer are designed to support: adaptive intervals based on recall results,
 difficulty-aware scheduling, notifications, AI hints/questions, weak-topic detection, and
 multiple attempts per problem.
+# DSA Revision Tracker
+
+## Optional LeetCode companion
+
+LeetCode does not provide a supported public API for importing accepted submissions, and its terms prohibit crawling and scraping. This project therefore does **not** ask for a LeetCode password, store cookies, or poll your account.
+
+For a deliberate, privacy-conscious shortcut, load the local [`extension`](./extension) folder as an unpacked Chromium extension. In **Settings → LeetCode companion**, create a one-time token, enter it plus your tracker URL in the extension, then press **Add current LeetCode problem** while viewing a problem you just solved. The tracker validates the token, creates the ordinary `LEETCODE` problem, and builds its fixed revision schedule. Revoke the token from Settings at any time.

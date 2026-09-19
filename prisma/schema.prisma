@@ -57,6 +57,23 @@ model User {
   problems         Problem[]
   revisionSettings RevisionSettings?
   pushSubscriptions PushSubscription[]
+  integrationTokens IntegrationToken[]
+}
+
+/// Tokens are app-issued credentials for companion clients (for example, the
+/// optional browser extension). Only a SHA-256 hash is persisted.
+model IntegrationToken {
+  id        String   @id @default(cuid())
+  userId    String
+  label     String
+  tokenHash String   @unique
+  lastUsedAt DateTime?
+  revokedAt DateTime?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, revokedAt])
 }
 
 model PushSubscription {

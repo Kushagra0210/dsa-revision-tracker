@@ -54,6 +54,15 @@ export const completeRevisionSchema = z.object({
   solutionViewed: z.boolean().default(false),
 });
 
+/** Payload deliberately contains only metadata visible to the user in their tab. */
+export const leetCodeCompanionSchema = z.object({
+  problemNumber: z.string().trim().min(1).max(50),
+  title: z.string().trim().min(1).max(300),
+  difficulty: z.enum(difficultyValues).optional(),
+  url: z.string().url().max(2048).refine((url) => new URL(url).hostname.endsWith("leetcode.com"), "A LeetCode URL is required"),
+  topic: z.string().trim().max(80).optional(),
+});
+
 export const revisionSettingsSchema = z.object({
   intervals: z
     .array(z.coerce.number().int("Intervals must be whole days").min(1, "Intervals must be at least 1 day").max(3650))
